@@ -1,12 +1,62 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { LogOut } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import type React from "react"
 
 export function Navbar({ userData, onLogout }) {
-  const [showLogoutMenu, setShowLogoutMenu] = useState(false)
+  const [user, setUser] = useState<{ id: string; nombre_completo: string } | null>(null);
+  const router = useRouter();
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
+  const [showLogoutMenu, setShowLogoutMenu] = useState(false)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const userId = localStorage.getItem("userId");
+      const userName = localStorage.getItem("userName");
+
+      console.log("🔍 Intentando obtener User ID desde localStorage:", userId);
+      if (!userId || !userName) {
+        router.push("/login");
+      } else {
+        setUser({ id: userId, nombre_completo: userName });
+      }
+    }
+  }, []);
+
+  const handleClick = async () => {
+    setError("")
+    setLoading(true)
+
+    try {
+      const response = await fetch("/api/crear-familia", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ID: user?.id, NOMBRE: user?.nombre_completo }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error en la autenticación")
+      }
+
+      if (data.redirectTo) {
+        router.push(data.redirectTo)
+      } else {
+        setError("Error al redirigir al usuario")
+      }
+    } catch (error: any) {
+      setError(error.message || "Error en la autenticación")
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
     <nav className="fixed top-0 left-0 w-full bg-white text-black shadow-sm z-50 h-16">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 h-full">
@@ -27,11 +77,14 @@ export function Navbar({ userData, onLogout }) {
               Inicio
             </Link>
 
+            { /* Crear familia */}
+            <button style={{ cursor: "pointer", color: "gray" }} onClick={handleClick}>Crear familia</button>
+
             {/* User name */}
             {userData && (
               <div className="hidden md:flex items-center text-gray-700">
                 <span className="mr-2">Hola,</span>
-                <span className="font-medium">{userData.nombre || "Usuario"}</span>
+                <span className="font-medium">{user?.nombre_completo || "Usuario"}</span>
               </div>
             )}
 

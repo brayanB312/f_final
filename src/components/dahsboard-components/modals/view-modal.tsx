@@ -5,7 +5,7 @@ import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
 import 'react-pdf/dist/esm/Page/TextLayer.css'
 
 // Configuración esencial para PDF.js
-pdfjs.GlobalWorkerOptions.workerSrc = '"https://cdn.jsdelivr.net/npm/pdfjs-dist@2.7.570/build/pdf.worker.min.js';
+pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.7.570/build/pdf.worker.min.js';
 
 interface ViewModalContentProps {
   documento: {
