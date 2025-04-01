@@ -25,34 +25,35 @@ interface Documento {
   nombre: string;
   tipo: string;
   fechaCreacion: string;
-  propietario: string;
-  rutaArchivo?: string;  
-  contenido?: string;    
+  usuario_id: string;
+  propietario_nombre: string;
+  rutaArchivo?: string;
+  contenido?: string;
+  estado?: 'pendiente' | 'aprobado' | 'rechazado';
 }
 
 interface ModalConfig {
-  show: boolean
-  type: string
-  title: string
-  item: Documento | null
+  show: boolean;
+  type: string;
+  title: string;
+  item: Documento | null;
 }
 
 interface PageConfig {
-  title: string
-  subtitle: string
-  emptyMessage: string
-  emptyIcon: React.ReactNode 
-  addType: string
-  addText: string
-  searchPlaceholder: string
+  title: string;
+  subtitle: string;
+  emptyMessage: string;
+  emptyIcon: React.ReactNode;
+  addType: string;
+  addText: string;
+  searchPlaceholder: string;
 }
 
 interface PageConfigs {
-  [key: string]: PageConfig
+  [key: string]: PageConfig;
 }
 
 export default function Dashboard() {
-  
   const [user, setUser] = useState<{ id: string; nombre_completo: string } | null>(null);
   const router = useRouter();
 
@@ -66,12 +67,12 @@ export default function Dashboard() {
         router.push("/login"); 
       } else {
         setUser({ id: userId, nombre_completo: userName });
-        fetchDocuments(userId); // Fetch documents with userId
+        fetchDocuments(userId);
       }
     }
   }, []);
 
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [documents, setDocuments] = useState<Documento[]>([]);
   const [filteredDocuments, setFilteredDocuments] = useState<Documento[]>([]);
 
@@ -87,7 +88,6 @@ export default function Dashboard() {
       const response = await fetch(`/api/documents?userId=${userId}`);
       const data = await response.json();
   
-      // Usar la ruta tal cual viene de la base de datos sin modificarla
       console.log("📄 Documentos obtenidos:", data);
       setDocuments(data);
       setFilteredDocuments(data);
@@ -97,31 +97,55 @@ export default function Dashboard() {
       setIsLoading(false);
     }
   };
-  
 
-  // UI states with proper types
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
-  const [activeItem, setActiveItem] = useState<string>("Dashboard")
-  const [searchTerm, setSearchTerm] = useState<string>("")
+  const renderStatusBadge = (status: string = 'pendiente') => {
+    switch (status) {
+      case 'aprobado':
+        return (
+          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+            Aprobado
+          </span>
+        );
+      case 'rechazado':
+        return (
+          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+            Rechazado
+          </span>
+        );
+      default:
+        return (
+          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+            Pendiente
+          </span>
+        );
+    }
+  };
 
-  // Modal state with proper type
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [activeItem, setActiveItem] = useState<string>("Dashboard");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
   const [modalConfig, setModalConfig] = useState<ModalConfig>({
     show: false,
     type: "",
     title: "",
     item: null,
-  })
+  });
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
-  
-    const filtered = documents.filter(
-      (doc) =>
-        (doc.nombre && doc.nombre.toLowerCase().includes(term)) ||
-        (doc.tipo && doc.tipo.toLowerCase().includes(term)) ||
-        (doc.propietario && doc.propietario.toLowerCase().includes(term)),
-    );
+
+    const filtered = documents.filter((doc) => {
+      const searchFields = [
+        doc.nombre?.toLowerCase() || '',
+        doc.tipo?.toLowerCase() || '',
+        doc.propietario_nombre?.toLowerCase() || ''
+      ].join(' ');
+
+      return searchFields.includes(term);
+    });
+    
     setFilteredDocuments(filtered);
   };
 
@@ -130,15 +154,15 @@ export default function Dashboard() {
       documento: "Nuevo Documento",
       familiar: "Añadir Familiar",
       compartir: "Compartir Documento",
-    }
+    };
 
     setModalConfig({
       show: true,
       type,
       title: titles[type] || "Añadir",
       item: null,
-    })
-  }
+    });
+  };
 
   const handleAction = (action: string, item: Documento) => {
     const titles: Record<string, string> = {
@@ -146,29 +170,26 @@ export default function Dashboard() {
       download: "Descargar Documento",
       edit: "Editar Documento",
       delete: "Eliminar Documento",
-    }
+    };
 
     setModalConfig({
       show: true,
       type: action,
       title: titles[action] || "Acción",
       item,
-    })
-  }
+    });
+  };
 
   const handleDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/delete/${id}`, {
         method: 'DELETE',
       });
-  
-      console.log('Response Status:', response.status);  // Imprime el código de estado para ver la respuesta
       
       if (response.ok) {
-        // Filtrar el documento eliminado del estado
-        setDocuments((prevDocs) => prevDocs.filter(doc => doc.id !== id));
-        setFilteredDocuments((prevDocs) => prevDocs.filter(doc => doc.id !== id));
-        closeModal(); // Cerrar el modal después de eliminar
+        setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== id));
+        setFilteredDocuments(prevDocs => prevDocs.filter(doc => doc.id !== id));
+        closeModal();
         alert('Documento eliminado exitosamente');
       } else {
         throw new Error('Error al eliminar el documento');
@@ -180,38 +201,36 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
-    alert("Cerrando sesión...")
-  }
+    alert("Cerrando sesión...");
+  };
 
   const closeModal = () => {
-    setModalConfig({ show: false, type: "", title: "", item: null })
-  }
+    setModalConfig({ show: false, type: "", title: "", item: null });
+  };
 
-  // Render modal content based on type
   const renderModalContent = () => {
     const { type, item } = modalConfig;
 
     switch (type) {
       case "filter":
-        return <FilterModalContent />
+        return <FilterModalContent />;
       case "documento":
-        return <DocumentModalContent />
+        return <DocumentModalContent />;
       case "familiar":
-        return <FamilyModalContent />
+        return <FamilyModalContent />;
       case "compartir":
-        return <ShareModalContent />
+        return <ShareModalContent />;
       case "download":
         return item ? <DownloadModalContent documento={item} onClose={closeModal} /> : null;
       case "edit":
-        return <EditModalContent />
+        return <EditModalContent />;
       case "delete":
-        return <DeleteModalContent   onDelete={() => handleDelete(item?.id || '')} onClose={closeModal}/>
+        return <DeleteModalContent onDelete={() => handleDelete(item?.id || '')} onClose={closeModal} />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
-  // Page configuration with proper type
   const pageConfig: PageConfigs = {
     Dashboard: {
       title: `Bienvenido, ${user?.nombre_completo}`,
@@ -249,20 +268,18 @@ export default function Dashboard() {
       addText: "Compartir Documento",
       searchPlaceholder: "Buscar documentos compartidos...",
     },
-  }
+  };
 
-  // Render content based on active menu item
   const renderContent = () => {
     if (isLoading) {
       return (
         <div className="flex justify-center items-center h-full">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
-      )
+      );
     }
 
-    // Use type guard to ensure activeItem exists in pageConfig
-    const config = pageConfig[activeItem as keyof typeof pageConfig] || pageConfig.Dashboard
+    const config = pageConfig[activeItem as keyof typeof pageConfig] || pageConfig.Dashboard;
 
     return (
       <div className="max-w-7xl mx-auto">
@@ -286,7 +303,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Total Documentos</p>
-                  <p className="text-2xl font-bold">0</p>
+                  <p className="text-2xl font-bold">{documents.length}</p>
                 </div>
               </div>
             </div>
@@ -296,8 +313,10 @@ export default function Dashboard() {
                   <CheckCircle className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Documentos Validados</p>
-                  <p className="text-2xl font-bold">0</p>
+                  <p className="text-sm text-gray-500">Documentos Aprobados</p>
+                  <p className="text-2xl font-bold">
+                    {documents.filter(doc => doc.estado === 'aprobado').length}
+                  </p>
                 </div>
               </div>
             </div>
@@ -307,8 +326,10 @@ export default function Dashboard() {
                   <XCircle className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Pendientes de Validación</p>
-                  <p className="text-2xl font-bold">0</p>
+                  <p className="text-sm text-gray-500">Pendientes</p>
+                  <p className="text-2xl font-bold">
+                    {documents.filter(doc => !doc.estado || doc.estado === 'pendiente').length}
+                  </p>
                 </div>
               </div>
             </div>
@@ -318,8 +339,10 @@ export default function Dashboard() {
                   <Users className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Miembros Familiares</p>
-                  <p className="text-2xl font-bold">0</p>
+                  <p className="text-sm text-gray-500">Rechazados</p>
+                  <p className="text-2xl font-bold">
+                    {documents.filter(doc => doc.estado === 'rechazado').length}
+                  </p>
                 </div>
               </div>
             </div>
@@ -353,7 +376,6 @@ export default function Dashboard() {
         </div>
 
         {/* Content area */}
-
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           {filteredDocuments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
@@ -386,6 +408,9 @@ export default function Dashboard() {
                       Fecha
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -407,10 +432,13 @@ export default function Dashboard() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {doc.propietario}
+                        {doc.propietario_nombre}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(doc.fechaCreacion).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {renderStatusBadge(doc.estado)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
@@ -435,10 +463,9 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -468,6 +495,5 @@ export default function Dashboard() {
         </Modal>
       )}
     </div>
-  )
+  );
 }
-

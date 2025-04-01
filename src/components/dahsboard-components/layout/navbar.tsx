@@ -77,13 +77,10 @@ export function Navbar({ userData, onLogout }) {
               Inicio
             </Link>
 
-            { /* Crear familia */}
-            <button style={{ cursor: "pointer", color: "gray" }} onClick={handleClick}>Crear familia</button>
 
             {/* User name */}
             {userData && (
               <div className="hidden md:flex items-center text-gray-700">
-                <span className="mr-2">Hola,</span>
                 <span className="font-medium">{user?.nombre_completo || "Usuario"}</span>
               </div>
             )}
