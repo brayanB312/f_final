@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Search,
   FileText,
@@ -41,6 +41,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { getGobiernoUser } from "@/app/actions/gobierno"
 
 // Tipos de estado para los documentos
 const STATUS = {
@@ -110,6 +111,7 @@ const getStatusIcon = (status: StatusType) => {
   }
 }
 
+// Modificar la interfaz PanelGobiernoProps para incluir el nombre completo del usuario de gobierno
 interface PanelGobiernoProps {
   adminUser?: {
     name: string
@@ -119,7 +121,7 @@ interface PanelGobiernoProps {
   }
 }
 
-export default function PanelGobierno({ adminUser = { name: "Admin", role: "Administrador" } }: PanelGobiernoProps) {
+export default function PanelGobierno({}: PanelGobiernoProps) {
   // Estados para la UI
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [activeTab, setActiveTab] = useState("documento")
@@ -130,6 +132,39 @@ export default function PanelGobierno({ adminUser = { name: "Admin", role: "Admi
 
   // Estados para los datos
   const [document, setDocument] = useState<Document | null>(null)
+
+  // Modify the useState for adminUser to properly manage the state
+  const [adminUser, setAdminUser] = useState({
+    name: "Admin",
+    role: "Administrador",
+    avatar: undefined,
+    initials: undefined,
+  })
+
+  // Estado para el nombre del gobierno
+  const [nombreGobierno, setNombreGobierno] = useState("")
+
+  // Replace the existing useEffect with this updated version
+  useEffect(() => {
+    async function loadGobiernoData() {
+      try {
+        const result = await getGobiernoUser()
+        if (result.success && result.data) {
+          setNombreGobierno(result.data.nombre_completo)
+          // Update the adminUser state with the fetched name
+          setAdminUser((prev) => ({
+            ...prev,
+            name: result.data.nombre_completo,
+            initials: result.data.nombre_completo.charAt(0),
+          }))
+        }
+      } catch (error) {
+        console.error("Error al cargar datos de gobierno:", error)
+      }
+    }
+
+    loadGobiernoData()
+  }, [])
 
   // Función para cambiar tema claro/oscuro
   const toggleTheme = () => {
@@ -696,7 +731,6 @@ export default function PanelGobierno({ adminUser = { name: "Admin", role: "Admi
                           <Button
                             variant="outline"
                             size="sm"
-                            className="dark:border-slate-600 dark:text-slate-200"
                             className="dark:border-slate-600 dark:text-slate-200"
                             onClick={() => window.open(currentPdf.url, "_blank")}
                           >

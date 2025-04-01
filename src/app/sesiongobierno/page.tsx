@@ -6,7 +6,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-export default function LoginPage() {
+export default function LoginGobierno() {
   // Estados para el formulario
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -44,7 +44,7 @@ export default function LoginPage() {
     setError("")
 
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch("/api/gobierno/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -57,18 +57,13 @@ export default function LoginPage() {
       const data = await response.json()
 
       if (response.ok) {
-        // Guardar datos del usuario en localStorage si es necesario
-        if (rememberMe) {
-          localStorage.setItem("userId", data.userId)
-          localStorage.setItem("userName", data.userName)
-        } else {
-          // Usar sessionStorage si no quiere recordar
-          sessionStorage.setItem("userId", data.userId)
-          sessionStorage.setItem("userName", data.userName)
-        }
+        // Guardar datos del usuario en localStorage
+        localStorage.setItem("userId", data.userId)
+        localStorage.setItem("userName", data.userName)
+        localStorage.setItem("userRole", "gobierno")
 
-        // Redirigir al dashboard
-        router.push("/dashboard")
+        // Redirigir al panel de gobierno
+        router.push("/paneldegobierno")
       } else {
         setError(data.error || "Credenciales inválidas")
       }
@@ -86,9 +81,9 @@ export default function LoginPage() {
       <header className={`border-b ${isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white"}`}>
         <div className="flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" width={32} height={32} />
+            <img src="/logo.png" alt="Logo Panel de Gobierno" width={32} height={32} />
             <h1 className={`text-lg md:text-xl font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-              Portal Ciudadano
+              Panel de Gobierno
             </h1>
           </div>
 
@@ -179,13 +174,21 @@ export default function LoginPage() {
         >
           <div className="space-y-1 text-center mb-6">
             <div className="flex justify-center mb-4">
-              <div className={`rounded-full p-3 ${isDarkMode ? "bg-blue-900/20" : "bg-blue-100"}`}>
-                <img src="/logo.png" alt="Logo" width={48} height={48} className="h-12 w-12 object-contain" />
+              <div className={`rounded-full p-3 ${isDarkMode ? "bg-green-900/20" : "bg-green-100"}`}>
+                <img
+                  src="/logo.png"
+                  alt="Logo Panel de Gobierno"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 object-contain"
+                />
               </div>
             </div>
-            <h2 className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>Iniciar Sesión</h2>
+            <h2 className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+              Acceso Gubernamental
+            </h2>
             <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"}`}>
-              Ingrese sus credenciales para acceder a su cuenta
+              Ingrese sus credenciales para acceder al panel de gobierno
             </p>
           </div>
 
@@ -241,7 +244,7 @@ export default function LoginPage() {
                 </label>
                 <button
                   type="button"
-                  className={`text-xs ${isDarkMode ? "text-blue-400" : "text-blue-600"} hover:underline`}
+                  className={`text-xs ${isDarkMode ? "text-green-400" : "text-green-600"} hover:underline`}
                 >
                   ¿Olvidó su contraseña?
                 </button>
@@ -324,7 +327,7 @@ export default function LoginPage() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className={`h-4 w-4 rounded border ${isDarkMode ? "border-slate-600" : "border-gray-300"} ${isDarkMode ? "text-blue-500" : "text-blue-600"}`}
+                className={`h-4 w-4 rounded border ${isDarkMode ? "border-slate-600" : "border-gray-300"} ${isDarkMode ? "text-green-500" : "text-green-600"}`}
               />
               <label htmlFor="remember" className={`text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"}`}>
                 Recordar mis credenciales
@@ -334,28 +337,19 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 px-4 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full py-2 px-4 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? "Procesando..." : "Iniciar Sesión"}
             </button>
 
             <div className="mt-6 space-y-2">
               <p className={`text-center text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"}`}>
-                ¿No tienes una cuenta?{" "}
+                ¿No tiene una cuenta de gobierno?{" "}
                 <Link
-                  href="/register"
-                  className={`${isDarkMode ? "text-blue-400" : "text-blue-600"} hover:underline font-medium`}
-                >
-                  Regístrate aquí
-                </Link>
-              </p>
-              <p className={`text-center text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"}`}>
-                ¿Eres funcionario de gobierno?{" "}
-                <Link
-                  href="../gobierno/login"
+                  href="/registergobierno"
                   className={`${isDarkMode ? "text-green-400" : "text-green-600"} hover:underline font-medium`}
                 >
-                  Acceso para gobierno
+                  Regístrese aquí
                 </Link>
               </p>
             </div>
@@ -368,7 +362,7 @@ export default function LoginPage() {
         className={`py-4 px-6 border-t ${isDarkMode ? "bg-slate-800 border-slate-700 text-slate-400" : "bg-white text-gray-500"}`}
       >
         <div className="text-center text-sm">
-          © {new Date().getFullYear()} Portal Ciudadano. Todos los derechos reservados.
+          © {new Date().getFullYear()} Panel de Gobierno. Todos los derechos reservados.
         </div>
       </footer>
     </div>

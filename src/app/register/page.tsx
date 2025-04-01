@@ -429,12 +429,6 @@ export default function Register() {
               Inicia sesión aquí
             </Link>
           </p>
-          <p className="text-center text-sm text-gray-600">
-            ¿Eres funcionario de gobierno?{" "}
-            <Link href="/gobierno/registro" className="font-semibold text-blue-600 hover:text-blue-500">
-              Regístrate como gobierno
-            </Link>
-          </p>
         </div>
       </div>
     </div>
