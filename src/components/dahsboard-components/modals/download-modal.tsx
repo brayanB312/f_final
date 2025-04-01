@@ -35,10 +35,7 @@ export function DownloadModalContent({ documento, onClose }: DownloadModalProps)
     <div className="space-y-4">
       <p>¿Estás seguro que deseas descargar el documento <strong>{documento.nombre}</strong>?</p>
       <div className="flex justify-end space-x-2">
-        <button onClick={onClose}>
-          Cancelar
-        </button>
-        <button onClick={handleDownload}>
+        <button onClick={handleDownload} className="flex items-center cursor-pointer bg-white text-gray-800 border border-gray-300 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 active:bg-gray-200 transition">
           <Download className="mr-2 h-4 w-4" />
           Descargar
         </button>
