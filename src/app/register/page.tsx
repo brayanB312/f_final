@@ -16,7 +16,6 @@ interface RegisterFormData {
   estado: string
   genero: string
   contrasena: string
-
 }
 
 // Lista de estados de México para el select
@@ -63,7 +62,7 @@ const OPCIONES_GENERO = [
   { value: "Prefiero no decirlo", label: "Prefiero no decirlo" },
 ]
 
-export default function RegisterGobierno() {
+export default function Register() {
   const router = useRouter()
 
   // Estado inicial del formulario
@@ -76,7 +75,6 @@ export default function RegisterGobierno() {
     estado: "",
     genero: "",
     contrasena: "",
-
   })
 
   // Estados para controlar la UI
@@ -127,8 +125,6 @@ export default function RegisterGobierno() {
       return
     }
 
-
-
     // Validar que todos los campos estén presentes
     const requiredFields = Object.entries(formData).filter(([_, value]) => !value)
     if (requiredFields.length > 0) {
@@ -141,7 +137,7 @@ export default function RegisterGobierno() {
 
     try {
       // Enviar datos al servidor
-      const response = await fetch("/api/registroGob", {
+      const response = await fetch("/api/registro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -151,14 +147,14 @@ export default function RegisterGobierno() {
 
       if (response.ok) {
         // Registro exitoso
-        alert("Usuario de gobierno registrado con éxito!")
-        router.push("/sesiongobierno")
+        alert("Usuario registrado con éxito!")
+        router.push("/login")
       } else {
         // Error en el registro
         setError(data.error || "Error en el registro")
       }
     } catch (err) {
-      console.error("Error al registrar usuario de gobierno:", err)
+      console.error("Error al registrar usuario:", err)
       setError("Error de conexión con el servidor")
     } finally {
       setLoading(false)
@@ -191,10 +187,8 @@ export default function RegisterGobierno() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img alt="Logo" src="/logo.png" className="mx-auto h-10 w-auto" />
-        <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-gray-900">
-          Crea tu cuenta de Gobierno
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">Registro exclusivo para funcionarios de gobierno</p>
+        <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-gray-900">Crea tu cuenta</h2>
+        <p className="mt-2 text-center text-sm text-gray-600">Registro para ciudadanos</p>
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -232,7 +226,7 @@ export default function RegisterGobierno() {
                 type="email"
                 required
                 autoComplete="email"
-                placeholder="ejemplo@gobierno.gob.mx"
+                placeholder="ejemplo@correo.com"
                 value={formData.correo}
                 onChange={handleChange}
                 className="block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
@@ -345,8 +339,6 @@ export default function RegisterGobierno() {
             </div>
           </div>
 
-          {/* Código de validación */}
-
           {/* Contraseña */}
           <div>
             <label htmlFor="contrasena" className="block text-sm font-medium text-gray-900">
@@ -423,21 +415,20 @@ export default function RegisterGobierno() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-green-500 focus-visible:outline-2 focus-visible:outline-green-600 transition transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-blue-600 transition transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? "Procesando..." : "Registrarse como Gobierno"}
+              {loading ? "Procesando..." : "Registrarse"}
             </button>
           </div>
         </form>
 
         <div className="mt-6 space-y-2">
           <p className="text-center text-sm text-gray-600">
-            ¿Ya tienes una cuenta de gobierno?{" "}
-            <Link href="/sesiongobierno" className="font-semibold text-green-600 hover:text-green-500">
+            ¿Ya tienes una cuenta?{" "}
+            <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-500">
               Inicia sesión aquí
             </Link>
           </p>
-
         </div>
       </div>
     </div>
