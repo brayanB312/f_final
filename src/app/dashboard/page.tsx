@@ -16,7 +16,6 @@ import { FilterModalContent } from "@/components/dahsboard-components/modals/fil
 import { DocumentModalContent } from "@/components/dahsboard-components/modals/document-modal"
 import { FamilyModalContent } from "@/components/dahsboard-components/modals/family-modal"
 import { ShareModalContent } from "@/components/dahsboard-components/modals/share-modal"
-import { ViewModalContent } from "@/components/dahsboard-components/modals/view-modal"
 import { DownloadModalContent } from "@/components/dahsboard-components/modals/download-modal"
 import { EditModalContent } from "@/components/dahsboard-components/modals/edit-modal"
 import { DeleteModalContent } from "@/components/dahsboard-components/modals/delete-modal"
@@ -81,13 +80,15 @@ export default function Dashboard() {
       console.error("❌ No se puede obtener documentos: userId es null");
       return;
     }
-
+  
     setIsLoading(true);
     try {
       console.log("📡 Buscando documentos para el usuario:", userId);
       const response = await fetch(`/api/documents?userId=${userId}`);
       const data = await response.json();
-      console.log("📄 Documentos recibidos:", data);
+  
+      // Usar la ruta tal cual viene de la base de datos sin modificarla
+      console.log("📄 Documentos obtenidos:", data);
       setDocuments(data);
       setFilteredDocuments(data);
     } catch (error) {
@@ -96,6 +97,7 @@ export default function Dashboard() {
       setIsLoading(false);
     }
   };
+  
 
   // UI states with proper types
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
@@ -198,8 +200,6 @@ export default function Dashboard() {
         return <FamilyModalContent />
       case "compartir":
         return <ShareModalContent />
-      case "view":
-        return <ViewModalContent documento={item} onClose={closeModal} />
       case "download":
         return item ? <DownloadModalContent documento={item} onClose={closeModal} /> : null;
       case "edit":
@@ -414,12 +414,6 @@ export default function Dashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleAction('view', doc)}
-                            className="text-indigo-600 hover:text-indigo-900"
-                          >
-                            Ver
-                          </button>
                           <button
                             onClick={() => handleAction('download', doc)}
                             className="text-green-600 hover:text-green-900"

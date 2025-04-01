@@ -86,8 +86,9 @@ export async function GET(request: Request) {
       tipo: String(row.tipo),
       fechaCreacion: String(row.fechaCreacion),
       propietario: Number(row.propietario),
-      rutaArchivo: `/uploads/${row.ruta}`,
+      rutaArchivo: row.ruta, // Usamos directamente la ruta tal cual está en la base de datos
     }));
+    
 
     return NextResponse.json(documents);
   } catch (error) {
