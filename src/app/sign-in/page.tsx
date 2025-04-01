@@ -296,7 +296,7 @@ export default function Register() {
                 términos y condiciones
               </a>{" "}
               y la{" "}
-              <a href="/privacy" className="text-indigo-600 hover:text-indigo-500">
+              <a href="/terms" className="text-indigo-600 hover:text-indigo-500">
                 política de privacidad
               </a>
             </label>
